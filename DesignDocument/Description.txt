@@ -1,0 +1,3 @@
+This is a cute-style 3D adventure game with a level-based system. Each level is rated with three stars. In the levels, the protagonist can obtain currency, and there is a limit on the number of respawn attempts and a time limit. These factors determine how many stars can be earned for each level.
+
+这是一个可爱风格的3D冒险小游戏，关卡制，每一关有三颗星的评级。在关卡中主人公可以获取货币，有重生次数限制与计时，这些决定了每一关能拿到多少星级。
