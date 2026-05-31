@@ -10,6 +10,8 @@ public class PlayerInputManager : MonoBehaviour
     protected float m_movementDirectionUnlockTime;
 
     protected InputAction m_movement;
+    
+    protected Camera m_camera;
 
     protected virtual void Awake()
     {
@@ -18,12 +20,27 @@ public class PlayerInputManager : MonoBehaviour
 
     protected virtual void Start()
     {
+        m_camera = Camera.main;
         actions.Enable();
     }
 
     protected virtual void CacheAction()
     {
         m_movement = actions["Movement"];
+    }
+    
+    public virtual Vector3 GetMovementCameraDirection()
+    {
+        var direction = GetMovementDirection();
+
+        if (direction.sqrMagnitude > 0)
+        {
+            var rotation = Quaternion.AngleAxis(m_camera.transform.eulerAngles.y, Vector3.up);
+            direction = rotation * direction;
+            direction = direction.normalized;
+        }
+
+        return direction;
     }
 
     public virtual Vector3 GetMovementDirection()

@@ -437,8 +437,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1945043064}
   - component: {fileID: 1945043065}
-  - component: {fileID: 1945043063}
+  - component: {fileID: 1945043066}
   - component: {fileID: 1945043062}
+  - component: {fileID: 1945043063}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -458,6 +459,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef8d1d0e86d549058f41e09b22d8e822, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  events:
+    onChange:
+      m_PersistentCalls:
+        m_Calls: []
+    onEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onExit:
+      m_PersistentCalls:
+        m_Calls: []
   states:
   - IdlePlayerState
 --- !u!114 &1945043063
@@ -500,7 +511,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 058e7d302b5c425aa3d95896692d33ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions: {fileID: 0}
+  actions: {fileID: -944628639613478452, guid: 47e1ac7f4656c3d4e9d04990e9dee347, type: 3}
+--- !u!114 &1945043066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1945043061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcd7bf1e49ba43f58c8b07cd79211532, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stats:
+  - {fileID: 11400000, guid: f3958fd33feeca14cbb6209127a70597, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
