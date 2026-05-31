@@ -24,6 +24,9 @@ public class PlayerInputManager : MonoBehaviour
         actions.Enable();
     }
 
+    protected virtual void OnEnable() => actions?.Enable();
+    protected virtual void OnDisable() => actions?.Disable();
+    
     protected virtual void CacheAction()
     {
         m_movement = actions["Movement"];

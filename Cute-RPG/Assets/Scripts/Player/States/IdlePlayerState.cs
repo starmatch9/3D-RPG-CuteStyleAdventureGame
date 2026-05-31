@@ -9,6 +9,7 @@ public class IdlePlayerState : PlayerState
 
     protected override void OnExit(Player player)
     {
+        Debug.Log("Exited IdlePlayerState");
     }
 
     protected override void OnStep(Player player)

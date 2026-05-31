@@ -37,7 +37,7 @@ public class Player : Entity<Player>
 
         var turningDrag = stats.current.turningDrag;
         var acceleration = stats.current.acceleration;
-        var finalAcceleration = stats.current.airAcceleration;
+        var finalAcceleration = acceleration;
         var topSpeed = stats.current.topSpeed;
         // 调用底层 Accelerate(方向, 转向阻尼, 加速度, 最大速度) 
         Accelerate(direction, turningDrag, finalAcceleration, topSpeed);
@@ -48,4 +48,8 @@ public class Player : Entity<Player>
         //     lateralVelocity = Vector3.ClampMagnitude(lateralVelocity, topSpeed);
         // }
     }
+    
+    // 平滑的朝向某个方向旋转
+    // 之前看起来瞬移的原因是人物在父物体下的位置不是000
+    public virtual void FaceDirectionSmooth(Vector3 direction) => FaceDirection(direction, stats.current.rotationSpeed);
 }

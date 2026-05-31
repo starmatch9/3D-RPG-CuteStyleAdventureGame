@@ -7,6 +7,16 @@
 )]
 public class PlayerStats : EntityStats<PlayerStats>
 {
+    //==============================【基础属性】==============================//
+    [Header("General Stats")]
+    public float pushForce = 4f;           // 推动物体的力量
+    public float snapForce = 15f;          // 将角色贴合到地面的吸附力
+    public float slideForce = 10f;         // 下坡滑动的额外推力
+    public float rotationSpeed = 970f;     // 玩家角色旋转速度（度/秒）
+    public float gravity = 38f;            // 普通重力加速度
+    public float fallGravity = 65f;        // 下落时额外重力加速度
+    public float gravityTopSpeed = 50f;    // 重力作用下的最大下落速度
+    
     //==============================【运动属性】==============================//
     [Header("Motion Stats")]
     public bool applySlopeFactor = true;   // 是否考虑坡度因子

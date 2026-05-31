@@ -6,6 +6,7 @@ using UnityEngine;
 // 使用时可以统一使用List<EntityBase>来批量管理类所有实体
 public abstract class EntityBase : MonoBehaviour
 {
+    public Vector3 unsizedPosition => transform.position;
 }
 
 // 泛型实例层，实体类的基类
@@ -100,5 +101,35 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
     {
         HandleStates();
         HandleController();
+    }
+    
+    // 让角色立即朝向某个方向（瞬间转向）
+    public virtual void FaceDirection(Vector3 direction)
+    {
+        // 如果方向向量有效（不是零向量）
+        if (direction.sqrMagnitude > 0)
+        {
+            // 生成一个面向 direction 方向的旋转（保持世界Y轴为上）
+            var rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+            // 直接设置物体的旋转
+            transform.rotation = rotation;
+        }
+    }
+    // 让角色按一定旋转速度朝向某个方向（平滑转向）
+    public virtual void FaceDirection(Vector3 direction, float degreesPerSecond)
+    {
+        // 必须是有效的方向
+        if (direction != Vector3.zero)
+        {
+            // 当前旋转
+            var rotation = transform.rotation;
+            // 本帧允许的最大旋转角度（受 Time.deltaTime 影响）
+            var rotationDelta = degreesPerSecond * Time.deltaTime;
+            // 目标旋转
+            var target = Quaternion.LookRotation(direction, Vector3.up);
+            // 按最大旋转速度逐渐逼近目标旋转
+            transform.rotation = Quaternion.RotateTowards(rotation, target, rotationDelta);
+        }
     }
 }
