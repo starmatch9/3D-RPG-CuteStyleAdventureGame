@@ -52,4 +52,32 @@ public class Player : Entity<Player>
     // 平滑的朝向某个方向旋转
     // 之前看起来瞬移的原因是人物在父物体下的位置不是000
     public virtual void FaceDirectionSmooth(Vector3 direction) => FaceDirection(direction, stats.current.rotationSpeed);
+    
+    public virtual void Decelerate() => Decelerate(stats.current.deceleration);
+
+    
+    // 平滑减速
+    public virtual void Friction()
+    {
+        if (OnSlopingGround())
+            Decelerate(stats.current.slopeFriction); // 在斜坡上使用斜坡摩擦
+        else
+            Decelerate(stats.current.friction);      // 普通摩擦
+    }
+    
+    public virtual void Gravity()
+    {
+        isGrounded = false;
+        if (!isGrounded && verticalVelocity.y > -stats.current.gravityTopSpeed)
+        {
+            var speed = verticalVelocity.y;
+            // 上升时用普通重力，下落时用更强的下落重力
+            var force = verticalVelocity.y > 0 ? stats.current.gravity : stats.current.fallGravity;
+            speed -= force * gravityMultiplier * Time.deltaTime;
+
+            // 限制最大下落速度
+            speed = Mathf.Max(speed, -stats.current.gravityTopSpeed);
+            verticalVelocity = new Vector3(0, speed, 0);
+        }
+    }
 }

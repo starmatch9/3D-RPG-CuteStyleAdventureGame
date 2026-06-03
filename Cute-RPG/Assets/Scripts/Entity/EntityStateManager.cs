@@ -20,6 +20,10 @@ public abstract class EntityStateManager<T> : EntityStateManager where T : Entit
 
     public EntityState<T> current { get; protected set; }
     public EntityState<T> last { get; protected set; }
+    
+    public int index => m_list.IndexOf(current);
+    
+    public int lastIndex => m_list.IndexOf(last);
 
     public T entity { get; protected set; }
 

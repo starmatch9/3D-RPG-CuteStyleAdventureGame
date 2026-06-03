@@ -7,6 +7,18 @@ using UnityEngine;
 public abstract class EntityBase : MonoBehaviour
 {
     public Vector3 unsizedPosition => transform.position;
+    
+    public bool isGrounded { get; protected set; } = true;        // 是否在地面上
+    
+    public CharacterController controller { get; protected set; } // 角色控制器组件
+    
+    public float originalHeight { get; protected set; }            // 初始碰撞器高度
+    
+    // 判断实体是否在斜坡上
+    public virtual bool OnSlopingGround()
+    {
+        return false;
+    }
 }
 
 // 泛型实例层，实体类的基类
@@ -33,6 +45,8 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
  
     public float decelerationMultiplier { get; set; } = 1f;  // 减速度倍率
     
+    public bool isGrounded { get; protected set; } = true;       
+    
     // 当前水平速度（XZ平面速度）
     public Vector3 lateralVelocity
     {
@@ -49,7 +63,28 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
 
     protected virtual void Awake()
     {
+        InitializeController();
         InitializeStateManager();
+    }
+    
+    // 初始化角色控制器组件（CharacterController）
+    // 负责角色的基本移动、碰撞等物理交互
+    protected virtual void InitializeController()
+    {
+        // 获取当前物体上的 CharacterController 组件
+        controller = GetComponent<CharacterController>();
+        // 如果没有，就动态添加一个 CharacterController
+        if (!controller)
+        {
+            controller = gameObject.AddComponent<CharacterController>();
+        }
+
+        // skinWidth 表示碰撞器表面到实际碰撞检测边界的距离（防止卡住用的小偏移）
+        controller.skinWidth = 0.005f;
+        // minMoveDistance 为最小移动距离（设为 0 表示即使移动非常小也会被检测到）
+        controller.minMoveDistance = 0;
+        // 记录角色控制器的初始高度（用于后续复位或高度调整）
+        originalHeight = controller.height;
     }
 
     // =>是C#函数体内只有一行表达式时候的使用方法，相当于{states = GetComponent<EntityStateManager<T>>()}
@@ -91,6 +126,11 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
 
     protected virtual void HandleController()
     {
+        if (controller.enabled)
+        {
+            controller.Move(velocity * Time.deltaTime);
+            return;
+        }
         transform.position += velocity * Time.deltaTime;
     }
     
@@ -99,24 +139,25 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
 
     protected virtual void Update()
     {
-        HandleStates();
-        HandleController();
+        HandleStates();   // 一个是状态逻辑更新
+        HandleController();    // 一个物理逻辑更新（目前只有物理位置）
     }
     
     // 让角色立即朝向某个方向（瞬间转向）
     public virtual void FaceDirection(Vector3 direction)
     {
+        // 向量长度的平方，计算更快
         // 如果方向向量有效（不是零向量）
         if (direction.sqrMagnitude > 0)
         {
             // 生成一个面向 direction 方向的旋转（保持世界Y轴为上）
+            // 让旋转的Z轴朝向direction，正上方Y轴指向世界向上的方向
             var rotation = Quaternion.LookRotation(direction, Vector3.up);
-
             // 直接设置物体的旋转
             transform.rotation = rotation;
         }
     }
-    // 让角色按一定旋转速度朝向某个方向（平滑转向）
+    // 让角色按一定旋转速度朝向某个方向（平滑转向）（第二个参数）
     public virtual void FaceDirection(Vector3 direction, float degreesPerSecond)
     {
         // 必须是有效的方向
@@ -132,4 +173,15 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
             transform.rotation = Quaternion.RotateTowards(rotation, target, rotationDelta);
         }
     }
+    
+    // 平滑减速，速度逐渐趋近于 0（水平速度减速）
+    public virtual void Decelerate(float deceleration)
+    {
+        // 计算本帧的减速度（decelerationMultiplier 可用于调节全局减速效果）
+        var delta = deceleration * decelerationMultiplier * Time.deltaTime;
+        // 将 lateralVelocity（水平速度向量）逐渐插值到 Vector3.zero（完全停止）
+        // 第三个参数是本帧允许的最大速度变化量
+        lateralVelocity = Vector3.MoveTowards(lateralVelocity, Vector3.zero, delta);
+    }
+    
 }

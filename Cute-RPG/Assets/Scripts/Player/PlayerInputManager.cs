@@ -10,8 +10,12 @@ public class PlayerInputManager : MonoBehaviour
     protected float m_movementDirectionUnlockTime;
 
     protected InputAction m_movement;
+    protected InputAction m_look;
     
     protected Camera m_camera;
+    
+    // 常量：鼠标设备名称
+    protected const string k_mouseDeviceName = "Mouse";
 
     protected virtual void Awake()
     {
@@ -30,7 +34,30 @@ public class PlayerInputManager : MonoBehaviour
     protected virtual void CacheAction()
     {
         m_movement = actions["Movement"];
+        m_look = actions["Look"];
     }
+    
+    public virtual Vector3 GetLookDirection()
+    {
+        var value = m_look.ReadValue<Vector2>();
+
+        if (IsLookingWithMouse())
+        {
+            return new Vector3(value.x, 0, value.y);
+        }
+
+        return GetAxisWithCrossDeadZone(value);
+    }
+    
+    public virtual bool IsLookingWithMouse()
+    {
+        if (m_look.activeControl == null)
+        {
+            return false;
+        }
+        return m_look.activeControl.device.name.Equals(k_mouseDeviceName);
+    }
+    
     
     public virtual Vector3 GetMovementCameraDirection()
     {
