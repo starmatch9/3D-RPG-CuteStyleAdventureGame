@@ -72,12 +72,18 @@ public class PlayerAnimator : MonoBehaviour
         InitializeParametersHash();
         InitializeAnimatorTriggers();
     }
-    
+
     /// <summary>
     /// 在 LateUpdate 中更新 Animator 参数，
     /// 保证动画在物理和输入计算完成后才同步
     /// </summary>
-    protected virtual void LateUpdate() => HandleAnimatorParameters();
+    protected virtual void LateUpdate()
+    {
+        
+        HandleAnimatorParameters();
+        Debug.Log($"当前状态索引: {m_player.states.index}");
+        
+    } 
     
     /// <summary>
     /// 每帧更新 Animator 参数，使动画与玩家实际状态同步
@@ -95,6 +101,7 @@ public class PlayerAnimator : MonoBehaviour
         animator.SetFloat(m_lateralSpeedHash, lateralSpeed);
         animator.SetFloat(m_verticalSpeedHash, verticalSpeed);
         animator.SetFloat(m_lateralAnimationSpeedHash, lateralAnimationSpeed);
+        animator.SetInteger(m_jumpCounterHash, m_player.jumpCounter);
         animator.SetBool(m_isGroundedHash, m_player.isGrounded);
     }
     

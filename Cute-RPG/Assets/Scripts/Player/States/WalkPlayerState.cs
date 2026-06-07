@@ -14,6 +14,9 @@ public class WalkPlayerState : PlayerState
     protected override void OnStep(Player player)
     {
         player.Gravity();
+        player.SnapToGround();
+        player.Jump();
+        player.Fall();
         
         // 根据摄像机去确定方向
         var inputDirection = player.inputs.GetMovementCameraDirection();

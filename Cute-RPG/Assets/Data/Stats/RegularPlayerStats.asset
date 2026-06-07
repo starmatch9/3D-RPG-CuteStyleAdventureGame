@@ -22,7 +22,7 @@ MonoBehaviour:
   applySlopeFactor: 0
   acceleration: 50
   deceleration: 100
-  friction: 28
+  friction: 60
   slopeFriction: 18
   topSpeed: 15
   turningDrag: 100
@@ -30,3 +30,7 @@ MonoBehaviour:
   brakeThreshold: -0.8
   slopeUpwardForce: 25
   slopeDownwardForce: 28
+  multiJumps: 1
+  coyoteJumpThreshold: 0.15
+  maxJumpHeight: 17
+  minJumpHeight: 13

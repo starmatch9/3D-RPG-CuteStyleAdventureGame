@@ -15,7 +15,11 @@ public class IdlePlayerState : PlayerState
     protected override void OnStep(Player player)
     {
         //Debug.Log("IdleStep");
-        player.Gravity();   
+        player.Gravity();  
+        player.SnapToGround();  // 贴地
+        player.Jump();
+        player.Fall();
+
         
         var inputDirection = player.inputs.GetMovementDirection();
         //Debug.Log("输入方向为：" + inputDirection);
