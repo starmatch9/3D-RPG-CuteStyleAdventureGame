@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CinemachineVirtualCamera))]
-[AddComponentMenu("PLAYER TWO/Platformer Project/Player/Player Camera")]
+[AddComponentMenu("Player/Player Camera")]
 public class PlayerCamera : MonoBehaviour
 {
     [Header("Camera Settings")] // 相机设置

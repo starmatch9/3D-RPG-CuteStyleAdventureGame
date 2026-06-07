@@ -12,13 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0136ad0524a4c6eb037de548dd97f85, type: 3}
   m_Name: RegularPlayerStats
   m_EditorClassIdentifier: 
-  applySlopeFactor: 1
-  acceleration: 13
-  deceleration: 28
+  pushForce: 4
+  snapForce: 15
+  slideForce: 10
+  rotationSpeed: 970
+  gravity: 38
+  fallGravity: 65
+  gravityTopSpeed: 50
+  applySlopeFactor: 0
+  acceleration: 50
+  deceleration: 100
   friction: 28
   slopeFriction: 18
-  topSpeed: 6
-  turningDrag: 28
+  topSpeed: 15
+  turningDrag: 100
   airAcceleration: 32
   brakeThreshold: -0.8
   slopeUpwardForce: 25

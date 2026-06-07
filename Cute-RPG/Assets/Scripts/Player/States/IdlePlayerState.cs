@@ -9,12 +9,13 @@ public class IdlePlayerState : PlayerState
 
     protected override void OnExit(Player player)
     {
-        Debug.Log("Exited IdlePlayerState");
+        //Debug.Log("Exited IdlePlayerState");
     }
 
     protected override void OnStep(Player player)
     {
         //Debug.Log("IdleStep");
+        player.Gravity();   
         
         var inputDirection = player.inputs.GetMovementDirection();
         //Debug.Log("输入方向为：" + inputDirection);

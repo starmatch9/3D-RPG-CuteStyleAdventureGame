@@ -24,6 +24,8 @@ public class BrakePlayerState : PlayerState
     /// </summary>
     protected override void OnStep(Player player)
     {
+        player.Gravity();
+        
         // 执行减速逻辑（逐渐降低水平速度，直到停下）
         player.Decelerate();
         

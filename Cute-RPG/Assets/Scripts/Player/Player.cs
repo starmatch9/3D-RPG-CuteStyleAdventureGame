@@ -67,6 +67,8 @@ public class Player : Entity<Player>
     
     public virtual void Gravity()
     {
+        Debug.Log($"重力生效前 verticalVelocity: {verticalVelocity.y}");
+        
         isGrounded = false;
         if (!isGrounded && verticalVelocity.y > -stats.current.gravityTopSpeed)
         {
