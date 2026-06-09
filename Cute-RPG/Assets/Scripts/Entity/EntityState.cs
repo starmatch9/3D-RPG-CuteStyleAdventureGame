@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+// 使用CRTP，这里也直接可以获取到传入的对象类型是什么，不用再子类里面做麻烦的识别再强转
 public abstract class EntityState<T> where T : Entity<T>
 {
     // 状态进入时触发的事件
@@ -60,6 +61,9 @@ public abstract class EntityState<T> where T : Entity<T>
 
     public static EntityState<T> CreateFromString(string typeName)
     {
+        // System.Activator.CreateInstance(Type)用来创建一个类型的实例
+        // System.Type.GetType(typeName)通过类名返回Type
+        // 向上类型转换
         return (EntityState<T>)System.Activator.CreateInstance(System.Type.GetType(typeName));
     }
 

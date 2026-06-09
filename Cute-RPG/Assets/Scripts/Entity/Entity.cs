@@ -3,46 +3,46 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 非泛型基础层，存放不需要知道具体子类类型的功能
-// 使用时可以统一使用List<EntityBase>来批量管理类所有实体
+// 使用时可以统一使用List<EntityBase>来批量管理类所有实体（规避了CRTP的弱点）
 public abstract class EntityBase : MonoBehaviour
 {
     public EntityEvents entityEvents;
-    
+
     public Vector3 unsizedPosition => transform.position;
-    
+
     protected readonly float m_groundOffset = 0.1f;
-    
-    public bool isGrounded { get; protected set; } = true;        // 是否在地面上
-    
+
+    public bool isGrounded { get; protected set; } = true; // 是否在地面上
+
     public CharacterController controller { get; protected set; } // 角色控制器组件
-    
-    public float originalHeight { get; protected set; }            // 初始碰撞器高度
-    public float lastGroundTime { get; protected set; }   
-    
+
+    public float originalHeight { get; protected set; } // 初始碰撞器高度
+    public float lastGroundTime { get; protected set; }
+
     public RaycastHit groundHit;
-    
+
     public float groundAngle { get; protected set; }
     public Vector3 groundNormal { get; protected set; }
     public Vector3 localSlopeDirection { get; protected set; }
-    
+
     public virtual bool IsPointUnderStep(Vector3 point) => stepPosition.y > point.y;
-    
+
     public float height => controller.height;
 
     public float radius => controller.radius;
-    
-    public Vector3 center => controller.center; 
-    
+
+    public Vector3 center => controller.center;
+
     public Vector3 position => transform.position + center;
-    
+
     public Vector3 stepPosition => position - transform.up * (height * 0.5f - controller.stepOffset);
-    
+
     // 判断实体是否在斜坡上
     public virtual bool OnSlopingGround()
     {
         return false;
     }
-    
+
     public virtual bool SphereCast(Vector3 direction, float distance,
         out RaycastHit hit, int layer = Physics.DefaultRaycastLayers,
         QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.Ignore)
@@ -107,7 +107,7 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         //slopeLimit是坡度的最大限制角度
         return IsPointUnderStep(hit.point) && Vector3.Angle(hit.normal, Vector3.up) < controller.slopeLimit;
     }
-    
+
     // 初始化角色控制器组件（CharacterController）
     // 负责角色的基本移动、碰撞等物理交互
     protected virtual void InitializeController()
@@ -212,20 +212,18 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
     }
 
 
-
-protected virtual void Update()
+    protected virtual void Update()
     {
         if (!controller.enabled)
         {
             return;
         }
-        
-        HandleStates();   // 一个是状态逻辑更新
+
+        HandleStates(); // 一个是状态逻辑更新
         HandleGround();
-        HandleController();    // 一个物理逻辑更新（目前只有物理位置）
-        
+        HandleController(); // 一个物理逻辑更新（目前只有物理位置）
     }
-    
+
     // 让角色立即朝向某个方向（瞬间转向）
     public virtual void FaceDirection(Vector3 direction)
     {
@@ -240,6 +238,7 @@ protected virtual void Update()
             transform.rotation = rotation;
         }
     }
+
     // 让角色按一定旋转速度朝向某个方向（平滑转向）（第二个参数）
     public virtual void FaceDirection(Vector3 direction, float degreesPerSecond)
     {
@@ -256,7 +255,7 @@ protected virtual void Update()
             transform.rotation = Quaternion.RotateTowards(rotation, target, rotationDelta);
         }
     }
-    
+
     // 平滑减速，速度逐渐趋近于 0（水平速度减速）
     public virtual void Decelerate(float deceleration)
     {
@@ -266,8 +265,8 @@ protected virtual void Update()
         // 第三个参数是本帧允许的最大速度变化量
         lateralVelocity = Vector3.MoveTowards(lateralVelocity, Vector3.zero, delta);
     }
-    
-    
+
+
     // 进入地面状态（角色刚刚落地时调用）
     protected virtual void EnterGround(RaycastHit hit)
     {
@@ -301,7 +300,7 @@ protected virtual void Update()
             entityEvents.OnGroundExit?.Invoke();
         }
     }
-    
+
     protected virtual void UpdateGround(RaycastHit hit)
     {
         // 只有当前处于地面状态时才执行
@@ -320,7 +319,7 @@ protected virtual void Update()
             transform.parent = hit.collider.CompareTag(GameTags.Platform) ? hit.transform : null;
         }
     }
-    
+
     // 将角色吸附到地面（防止悬空）
     public virtual void SnapToGround(float force)
     {

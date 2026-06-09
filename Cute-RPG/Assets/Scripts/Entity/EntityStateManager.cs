@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Entity依旧只是接口
+// 依旧拆成两层，这里可以把所有不依赖泛型的系统或者模块都挂载在这里
 public abstract class EntityStateManager : MonoBehaviour
 {
     public EntityStateManagerEvents events;
 }
 
-// 
+// 专门用来放管状态机的操作（大量用到泛型）
 public abstract class EntityStateManager<T> : EntityStateManager where T : Entity<T>
 {
     protected List<EntityState<T>> m_list = new List<EntityState<T>>();
@@ -72,6 +72,7 @@ public abstract class EntityStateManager<T> : EntityStateManager where T : Entit
 
    public virtual void Change<TState>() where TState : EntityState<T>
     {
+        // Type类型，同一个类的实例typeof获取的Type对象一样
         var type = typeof(TState);
 
         if (m_states.ContainsKey(type))
