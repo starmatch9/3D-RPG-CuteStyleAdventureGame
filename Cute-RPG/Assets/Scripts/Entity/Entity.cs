@@ -316,7 +316,7 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
             localSlopeDirection = new Vector3(groundNormal.x, 0, groundNormal.z).normalized;
             // 如果地面是平台（tag = Platform），让角色成为平台的子物体，跟随平台移动
             // 否则取消父子关系
-            transform.parent = hit.collider.CompareTag(GameTags.Platform) ? hit.transform : null;
+            //transform.parent = hit.collider.CompareTag(GameTags.Platform) ? hit.transform : null;
         }
     }
 
