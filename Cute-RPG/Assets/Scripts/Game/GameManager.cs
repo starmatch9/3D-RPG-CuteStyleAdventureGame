@@ -78,5 +78,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SetSpawnPoint(Vector3 position)
+    {
+        // 记录位置
+        startPosition = position;
+    }
+
     #endregion
 }
