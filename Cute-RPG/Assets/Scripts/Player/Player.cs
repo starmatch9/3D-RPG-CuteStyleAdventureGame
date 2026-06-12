@@ -76,10 +76,7 @@ public class Player : Entity<Player>
     // 平滑减速
     public virtual void Friction()
     {
-        if (OnSlopingGround())
-            Decelerate(stats.current.slopeFriction); // 在斜坡上使用斜坡摩擦
-        else
-            Decelerate(stats.current.friction);      // 普通摩擦
+        Decelerate(stats.current.friction);      // 普通摩擦
     }
     
     public virtual void Gravity()
@@ -125,7 +122,7 @@ public class Player : Entity<Player>
     public virtual void Jump(float height)
     {
         // Debug.Log("跳");
-        
+        GlobalData.effectManager.PlayEffect(GlobalData.effectManager.jump);
         jumpCounter++;
         verticalVelocity = Vector3.up * height;
         states.Change<FallPlayerState>(); // 切换为下落状态

@@ -18,7 +18,6 @@ public class PlayerStats : EntityStats<PlayerStats>
     public float acceleration = 13f;       // 加速度
     public float deceleration = 28f;       // 减速度
     public float friction = 28f;           // 地面摩擦力
-    public float slopeFriction = 18f;      // 坡面摩擦力
     public float topSpeed = 6f;            // 最高速度
     public float turningDrag = 28f;        // 转向时的阻力
     public float brakeThreshold = -0.8f;   // 刹车判定阈值

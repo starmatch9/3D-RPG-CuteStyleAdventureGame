@@ -13,7 +13,12 @@ public class GameManager : MonoBehaviour
     public Player player;
     public Transform playerTransform;
 
+    [HideInInspector]
+    public UI_Temp uiTemp; // 方便控制UI
+    
     private Vector3 startPosition;
+    
+    private int coinCount = 0;
 
     Vector3 GetPlayerPosition()
     {
@@ -83,6 +88,21 @@ public class GameManager : MonoBehaviour
         // 记录位置
         startPosition = position;
     }
+    
+    #region 收集金币
+
+    public void AddCoin()
+    {
+        coinCount++;
+    }
+
+    public int GetCoin()
+    {
+        return coinCount;
+    }
+    
+    #endregion
+    
 
     #endregion
 }

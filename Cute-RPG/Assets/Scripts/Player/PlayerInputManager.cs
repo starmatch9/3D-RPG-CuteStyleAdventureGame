@@ -51,6 +51,7 @@ public class PlayerInputManager : MonoBehaviour
         m_jump = actions["Jump"];
     }
     
+    // 获取视角方向，如果是鼠标直接获取轴，如果是摇杆把死区考虑在内
     public virtual Vector3 GetLookDirection()
     {
         var value = m_look.ReadValue<Vector2>();
@@ -72,7 +73,7 @@ public class PlayerInputManager : MonoBehaviour
         return m_look.activeControl.device.name.Equals(k_mouseDeviceName);
     }
     
-    
+    // 在世界坐标的基础上基于摄像机旋转，得到此视角下Moved朝向是什么
     public virtual Vector3 GetMovementCameraDirection()
     {
         var direction = GetMovementDirection();
@@ -87,6 +88,7 @@ public class PlayerInputManager : MonoBehaviour
         return direction;
     }
 
+    // 获取移动方向
     public virtual Vector3 GetMovementDirection()
     {
         if (Time.time < m_movementDirectionUnlockTime) return Vector3.zero;
@@ -95,6 +97,7 @@ public class PlayerInputManager : MonoBehaviour
         return GetAxisWithCrossDeadZone(value);
     }
 
+    // 获取把死区剔除死区的力度百分比
     public virtual Vector3 GetAxisWithCrossDeadZone(Vector2 axis)
     {
         var deadzone = InputSystem.settings.defaultDeadzoneMin;
@@ -103,6 +106,7 @@ public class PlayerInputManager : MonoBehaviour
         return new Vector3(axis.x, 0, axis.y);
     }
 
+    // 摇杆防抖，所以中间有一截死区，这个方法就是返回摇杆力度了（重映射说是）
     protected float RemapToDeadzone(float value, float deadzone) =>
         (value - (value > 0 ? -deadzone : deadzone)) / (1 - deadzone);
 

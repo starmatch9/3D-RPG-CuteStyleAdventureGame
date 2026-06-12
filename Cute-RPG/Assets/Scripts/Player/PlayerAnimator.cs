@@ -4,8 +4,6 @@ using UnityEngine;
 
 // 要求当前对象必须挂载 Player 组件
 [RequireComponent(typeof(Player))]
-// 在 Unity 的 "Add Component" 菜单里显示该脚本的路径
-[AddComponentMenu("PLAYER TWO/Platformer Project/Player/Player Animator")]
 public class PlayerAnimator : MonoBehaviour
 {
     /// <summary>

@@ -36,12 +36,7 @@ public abstract class EntityBase : MonoBehaviour
     public Vector3 position => transform.position + center;
 
     public Vector3 stepPosition => position - transform.up * (height * 0.5f - controller.stepOffset);
-
-    // 判断实体是否在斜坡上
-    public virtual bool OnSlopingGround()
-    {
-        return false;
-    }
+    
 
     public virtual bool SphereCast(Vector3 direction, float distance,
         out RaycastHit hit, int layer = Physics.DefaultRaycastLayers,

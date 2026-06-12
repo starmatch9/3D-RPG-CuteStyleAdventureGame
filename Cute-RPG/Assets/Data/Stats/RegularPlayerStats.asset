@@ -20,11 +20,10 @@ MonoBehaviour:
   acceleration: 50
   deceleration: 150
   friction: 100
-  slopeFriction: 18
   topSpeed: 10
   turningDrag: 100
   brakeThreshold: -0.8
-  multiJumps: 1000
+  multiJumps: 1
   coyoteJumpThreshold: 0.15
   maxJumpHeight: 17
   minJumpHeight: 13
