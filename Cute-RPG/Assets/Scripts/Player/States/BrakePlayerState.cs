@@ -5,23 +5,17 @@
 [AddComponentMenu("PLAYER TWO/Platformer Project/Player/States/Brake Player State")]
 public class BrakePlayerState : PlayerState
 {
-    /// <summary>
-    /// 进入刹车状态时调用（此处无额外逻辑）
-    /// </summary>
+    // 进入刹车状态时调用
     protected override void OnEnter(Player player)
     {
     }
-
-    /// <summary>
-    /// 离开刹车状态时调用（此处无额外逻辑）
-    /// </summary>
+    
+    // 离开刹车状态时调用
     protected override void OnExit(Player player)
     {
     }
-
-    /// <summary>
-    /// 每帧更新时调用（刹车逻辑）
-    /// </summary>
+    
+    // 每帧更新时调用
     protected override void OnStep(Player player)
     {
         player.Gravity();
@@ -41,8 +35,6 @@ public class BrakePlayerState : PlayerState
         }
     }
     
-    /// <summary>
-    /// 当处于刹车状态下发生碰撞时调用（此处无逻辑）
-    /// </summary>
+    // 当处于刹车状态下发生碰撞时调用
     public override void OnContact(Player player, Collider other) { }
 }

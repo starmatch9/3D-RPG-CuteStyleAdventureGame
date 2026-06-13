@@ -134,7 +134,7 @@ public class SettingButtons : MonoBehaviour
         }
         else if(currentResolution.text == "2560*1440")
         {
-            Screen.SetResolution(2569, 1440, true);
+            Screen.SetResolution(2560, 1440, true);
         }
 
         if(currentDisplay.text == "Window")

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 // 非泛型基础层，存放不需要知道具体子类类型的功能
@@ -16,14 +14,9 @@ public abstract class EntityBase : MonoBehaviour
 
     public CharacterController controller { get; protected set; } // 角色控制器组件
 
-    public float originalHeight { get; protected set; } // 初始碰撞器高度
     public float lastGroundTime { get; protected set; }
 
     public RaycastHit groundHit;
-
-    public float groundAngle { get; protected set; }
-    public Vector3 groundNormal { get; protected set; }
-    public Vector3 localSlopeDirection { get; protected set; }
 
     public virtual bool IsPointUnderStep(Vector3 point) => stepPosition.y > point.y;
 
@@ -119,8 +112,6 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         controller.skinWidth = 0.005f;
         // minMoveDistance 为最小移动距离（设为 0 表示即使移动非常小也会被检测到）
         controller.minMoveDistance = 0;
-        // 记录角色控制器的初始高度（用于后续复位或高度调整）
-        originalHeight = controller.height;
     }
 
     // =>是C#函数体内只有一行表达式时候的使用方法，相当于{states = GetComponent<EntityStateManager<T>>()}
@@ -302,16 +293,8 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         if (isGrounded)
         {
             // 更新地面射线检测信息
+            // 更新地面射线检测信息
             groundHit = hit;
-            // 记录地面法线（用于计算坡度方向）
-            groundNormal = groundHit.normal;
-            // 计算当前地面的坡度角（与世界Y轴的夹角）
-            groundAngle = Vector3.Angle(Vector3.up, groundHit.normal);
-            // 计算本地的坡度方向（水平投影后的法线方向）
-            localSlopeDirection = new Vector3(groundNormal.x, 0, groundNormal.z).normalized;
-            // 如果地面是平台（tag = Platform），让角色成为平台的子物体，跟随平台移动
-            // 否则取消父子关系
-            //transform.parent = hit.collider.CompareTag(GameTags.Platform) ? hit.transform : null;
         }
     }
 
