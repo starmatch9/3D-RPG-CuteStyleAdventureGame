@@ -18,14 +18,15 @@ public class Player : Entity<Player>
         InitializeInputs();
         InitializeStats();
         
+        // 注册监听
         entityEvents.OnGroundEnter.AddListener(() =>
         {
             ResetJumps();
         });
     }
 
-    public virtual void SnapToGround() => SnapToGround(stats.current.snapForce);
-    
+    #region  Initialize Function 初始化方法
+
     protected virtual void InitializeInputs()
     {
         // 从组件中获取
@@ -36,10 +37,14 @@ public class Player : Entity<Player>
     {
         stats = GetComponent<PlayerStatsManager>();
     }
-    
+
+    #endregion
+
+    #region 人物移动 Movement
+
     public virtual void Accelerate(Vector3 direction)
     {
-        // 根据是否按下 Run 键、是否在地面，决定不同的转向阻尼与加速度
+        // 参数都往可脚本化对象取
         var turningDrag = stats.current.turningDrag;
         var acceleration = stats.current.acceleration;
         var finalAcceleration = acceleration;
@@ -58,32 +63,7 @@ public class Player : Entity<Player>
         Accelerate(inputDirection);
     }
     public virtual void Decelerate() => Decelerate(stats.current.deceleration);
-
     
-    // 平滑减速
-    public virtual void Friction()
-    {
-        Decelerate(stats.current.friction);// 普通摩擦
-    }
-    
-    public virtual void Gravity()
-    {
-        //Debug.Log($"重力生效前 verticalVelocity: {verticalVelocity.y}");
-        
-        //isGrounded = false;
-        if (!isGrounded && verticalVelocity.y > -stats.current.gravityTopSpeed)
-        {
-            var speed = verticalVelocity.y;
-            // 上升时用普通重力，下落时用更强的下落重力
-            var force = verticalVelocity.y > 0 ? stats.current.gravity : stats.current.fallGravity;
-            speed -= force * gravityMultiplier * Time.deltaTime;
-
-            // 限制最大下落速度
-            speed = Mathf.Max(speed, -stats.current.gravityTopSpeed);
-            verticalVelocity = new Vector3(0, speed, 0);
-        }
-    }
-
     public virtual void Jump()
     {
         // 二段跳限制
@@ -99,6 +79,8 @@ public class Player : Entity<Player>
             }            
         }
 
+        // 松开跳跃键、跳跃过了、还在上升过程中，此时将垂直速度强制设为最小跳跃速度
+        // 也就是说按的时间越短，跳的越地
         if (inputs.GetJumpUp() && (jumpCounter > 0) && (verticalVelocity.y > stats.current.minJumpHeight))
         {
             verticalVelocity = Vector3.up * stats.current.minJumpHeight;
@@ -123,4 +105,41 @@ public class Player : Entity<Player>
             states.Change<FallPlayerState>();
         }
     }
+
+    #endregion
+
+    #region 特殊效果 Special
+
+    public virtual void SnapToGround() => SnapToGround(stats.current.snapForce);
+
+    // 平滑减速
+    public virtual void Friction()
+    {
+        Decelerate(stats.current.friction);// 普通摩擦
+    }
+    
+    public virtual void Gravity()
+    {
+        //Debug.Log($"重力生效前 verticalVelocity: {verticalVelocity.y}");
+        
+        //isGrounded = false;
+        
+        //角色在空中且没有加速到最快速度
+        // 目的是让上升有悬浮感，下落有重量感
+        if (!isGrounded && verticalVelocity.y > -stats.current.gravityTopSpeed)
+        {
+            var speed = verticalVelocity.y; // 记录速度
+            // 上升时用普通重力，下落时用更强的下落重力
+            var force = verticalVelocity.y > 0 ? stats.current.gravity : stats.current.fallGravity;
+            speed -= force * gravityMultiplier * Time.deltaTime;
+
+            // 限制最大下落速度
+            speed = Mathf.Max(speed, -stats.current.gravityTopSpeed);
+            verticalVelocity = new Vector3(0, speed, 0);
+        }
+    }
+    
+    #endregion
+    
+
 }

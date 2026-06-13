@@ -23,7 +23,9 @@ public class WalkPlayerState : PlayerState
         // Debug.Log($"速度: {player.lateralVelocity.magnitude}, 最大速度: {player.stats.current.topSpeed}");
         if (inputDirection.sqrMagnitude > 0)
         {
+            // 就是说如果输入方向和当前速度方向夹角太接近平角，先刹车
             var dot = Vector3.Dot(inputDirection, player.lateralVelocity);
+            // 刹车阈值一般是个负数-0.8，点乘是0也会加速
             if (dot >= player.stats.current.brakeThreshold)
             {
                 player.Accelerate(inputDirection);

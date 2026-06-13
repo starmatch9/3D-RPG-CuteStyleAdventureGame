@@ -8,9 +8,6 @@ public class PlayerAnimator : MonoBehaviour
     public string stateName = "State";
     public string isGroundedName = "Is Grounded";
 
-    [Header("Settings")]
-    public float minLateralAnimationSpeed = 0.5f;
-
     public Animator animator;
 
     protected int m_stateHash;

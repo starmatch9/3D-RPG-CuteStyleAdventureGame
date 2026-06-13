@@ -14,8 +14,8 @@
     {
         player.Gravity();
         player.SnapToGround();
-        player.FaceDirectionSmooth(player.lateralVelocity);
-        player.AccelerateToInputDirection();
+        player.FaceDirectionSmooth(player.lateralVelocity);  //在空中也可以转向移动
+        player.AccelerateToInputDirection();  // 其实就是走动逻辑
         player.Jump();
 
         if (player.isGrounded)
