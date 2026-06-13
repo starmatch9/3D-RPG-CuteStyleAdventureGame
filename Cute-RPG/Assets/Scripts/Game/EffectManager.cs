@@ -9,6 +9,8 @@ public class EffectManager : MonoBehaviour
     [Space]
     public AudioClip UI;
     public AudioClip jump;
+    public AudioClip Victory;
+    public AudioClip eat;
 
     private void Awake()
     {

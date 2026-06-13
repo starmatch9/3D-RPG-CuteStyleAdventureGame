@@ -21,6 +21,7 @@ public class GameFinish : MonoBehaviour
             if (flag.activeSelf == false)
             {
                 flag.SetActive(true);
+                GlobalData.effectManager.PlayEffect(GlobalData.effectManager.Victory);
                 StartCoroutine(ScaleFlagCoroutine(1f, 10f, 0.5f));
             }
         }
@@ -46,5 +47,9 @@ public class GameFinish : MonoBehaviour
         }
         
         flag.transform.localScale = endScale;
+        
+        yield return new WaitForSeconds(2f);
+        
+        GameManager.instance.GameVictory();
     }
 }

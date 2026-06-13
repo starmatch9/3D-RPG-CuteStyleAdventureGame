@@ -6,7 +6,6 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance { get; private set; }
 
-
     #region 玩家
 
     [Header("Player")] 
@@ -15,6 +14,11 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector]
     public UI_Temp uiTemp; // 方便控制UI
+    
+    [Header("Star Bottle Counter")] 
+    public int first_star = 0;
+    public int second_star = 0;
+    public int third_star = 0;
     
     private Vector3 startPosition;
     
@@ -87,6 +91,28 @@ public class GameManager : MonoBehaviour
     {
         // 记录位置
         startPosition = position;
+    }
+
+    public void GameVictory()
+    {
+        LightVictoryStar();
+        uiTemp.Finish();   
+    }
+
+    public void LightVictoryStar()
+    {
+        if (GetCoin() >= first_star)
+        {
+            uiTemp.LightStar(1);
+        }
+        if (GetCoin() >= second_star)
+        {
+            uiTemp.LightStar(2);
+        }
+        if (GetCoin() >= third_star)
+        {
+            uiTemp.LightStar(3);
+        }
     }
     
     #region 收集金币

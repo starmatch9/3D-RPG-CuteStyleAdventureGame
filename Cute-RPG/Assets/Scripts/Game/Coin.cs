@@ -18,6 +18,7 @@ public class Coin : MonoBehaviour
 
     public void EatCoin()
     {
+        GlobalData.effectManager.PlayEffect(GlobalData.effectManager.eat);
         GameManager.instance.AddCoin();
         Destroy(gameObject);
     }
