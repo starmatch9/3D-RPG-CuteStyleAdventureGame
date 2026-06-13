@@ -114,7 +114,6 @@ public class Player : Entity<Player>
         verticalVelocity = Vector3.up * height;
         states.Change<FallPlayerState>(); // 切换为下落状态
         playerEvents.OnJump?.Invoke();  // 类似常见的发送信息
-
     }
     
     public virtual void Fall()

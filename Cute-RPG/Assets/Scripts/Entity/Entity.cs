@@ -4,33 +4,40 @@ using UnityEngine;
 // 使用时可以统一使用List<EntityBase>来批量管理类所有实体（规避了CRTP的弱点）
 public abstract class EntityBase : MonoBehaviour
 {
+    // 用来注册委托的
     public EntityEvents entityEvents;
 
-    public Vector3 unsizedPosition => transform.position;
-
-    protected readonly float m_groundOffset = 0.1f;
-
-    public bool isGrounded { get; protected set; } = true; // 是否在地面上
-
+    // 角色控制器，自带碰撞检测的胶囊体物理组件，自带Move()等方法
     public CharacterController controller { get; protected set; } // 角色控制器组件
 
-    public float lastGroundTime { get; protected set; }
-
-    public RaycastHit groundHit;
-
-    public virtual bool IsPointUnderStep(Vector3 point) => stepPosition.y > point.y;
-
+    // 胶囊体的高
     public float height => controller.height;
 
+    // 胶囊体的粗
     public float radius => controller.radius;
 
+    // 胶囊体相对物体远点的偏移量（只是便宜量）
     public Vector3 center => controller.center;
 
+    // 在Camera模块会用到，表示物体的原点（而非胶囊体的原点）
+    public Vector3 unsizedPosition => transform.position;
+
+    // 胶囊体原点的世界位置
     public Vector3 position => transform.position + center;
 
-    public Vector3 stepPosition => position - transform.up * (height * 0.5f - controller.stepOffset);
-    
+    // 注意get和set这个语法，不是帮你写新方法，是限制get和set分别的访问权限
+    // get和set前面没表权限那就是{}前面的权限
+    // 比如以下这行：public get，protected set。
+    // 当使用set的时候，只有当前类和子类可以访问
+    public bool isGrounded { get; protected set; } = true; // 是否在地面上
 
+    // 记录距离上一次离开地面经过的时间
+    public float lastGroundTime { get; protected set; }
+
+    // 进行地面探测时多探测一点距离
+    protected readonly float m_groundOffset = 0.1f;
+
+    // 使用Physics的SphereCast射线检测
     public virtual bool SphereCast(Vector3 direction, float distance,
         out RaycastHit hit, int layer = Physics.DefaultRaycastLayers,
         QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.Ignore)
@@ -68,21 +75,8 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
 
     public float decelerationMultiplier { get; set; } = 1f; // 减速度倍率
 
-    //public bool isGrounded { get; protected set; } = true;
 
-    // 当前水平速度（XZ平面速度）
-    public Vector3 lateralVelocity
-    {
-        get { return new Vector3(velocity.x, 0, velocity.z); }
-        set { velocity = new Vector3(value.x, velocity.y, value.z); }
-    }
-
-    // 当前垂直速度（Y轴速度）
-    public Vector3 verticalVelocity
-    {
-        get { return new Vector3(0, velocity.y, 0); }
-        set { velocity = new Vector3(velocity.x, value.y, velocity.z); }
-    }
+    #region 生命周期
 
     protected virtual void Awake()
     {
@@ -90,11 +84,23 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         InitializeStateManager();
     }
 
-    protected virtual bool EvaluateLanding(RaycastHit hit)
+    protected virtual void Update()
     {
-        //slopeLimit是坡度的最大限制角度
-        return IsPointUnderStep(hit.point) && Vector3.Angle(hit.normal, Vector3.up) < controller.slopeLimit;
+        if (!controller.enabled)
+        {
+            return;
+        }
+
+        HandleStates(); // 一个是状态逻辑更新
+        HandleGround();
+        HandleController(); // 一个物理逻辑更新（目前只有物理位置）
     }
+
+    #endregion
+
+    // 转为初始化服务
+
+    #region Initialize方法
 
     // 初始化角色控制器组件（CharacterController）
     // 负责角色的基本移动、碰撞等物理交互
@@ -151,6 +157,12 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         }
     }
 
+    #endregion
+
+    // 每帧执行，做一件事，动作清晰
+
+    #region Handle方法
+
     protected virtual void HandleController()
     {
         if (controller.enabled)
@@ -176,18 +188,7 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
             // 如果之前不在地面状态
             if (!isGrounded)
             {
-                // 判断是否满足落地条件
-                if (EvaluateLanding(hit))
-                {
-                    // 进入落地逻辑
-                    EnterGround(hit);
-                }
-            }
-            // 已经在地面状态
-            else if (IsPointUnderStep(hit.point))
-            {
-                // 更新地面信息（比如接触点、法线等）
-                UpdateGround(hit);
+                EnterGround();
             }
         }
         else
@@ -197,17 +198,23 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         }
     }
 
+    #endregion
 
-    protected virtual void Update()
+
+    #region 人物移动
+
+    // 当前水平速度（XZ平面速度）
+    public Vector3 lateralVelocity
     {
-        if (!controller.enabled)
-        {
-            return;
-        }
+        get { return new Vector3(velocity.x, 0, velocity.z); }
+        set { velocity = new Vector3(value.x, velocity.y, value.z); }
+    }
 
-        HandleStates(); // 一个是状态逻辑更新
-        HandleGround();
-        HandleController(); // 一个物理逻辑更新（目前只有物理位置）
+    // 当前垂直速度（Y轴速度）
+    public Vector3 verticalVelocity
+    {
+        get { return new Vector3(0, velocity.y, 0); }
+        set { velocity = new Vector3(velocity.x, value.y, velocity.z); }
     }
 
     // 让角色立即朝向某个方向（瞬间转向）
@@ -225,7 +232,7 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         }
     }
 
-    // 让角色按一定旋转速度朝向某个方向（平滑转向）（第二个参数）
+    // 让角色按一定旋转速度朝向某个方向（平滑转向）（第二个参数）（函数重载）
     public virtual void FaceDirection(Vector3 direction, float degreesPerSecond)
     {
         // 必须是有效的方向
@@ -252,15 +259,17 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         lateralVelocity = Vector3.MoveTowards(lateralVelocity, Vector3.zero, delta);
     }
 
+    #endregion
+
+
+    #region 地面检测
 
     // 进入地面状态（角色刚刚落地时调用）
-    protected virtual void EnterGround(RaycastHit hit)
+    protected virtual void EnterGround()
     {
         // 只有当前不是地面状态时才执行（防止重复触发）
         if (!isGrounded)
         {
-            // 记录当前地面的射线检测信息（位置、法线等）
-            groundHit = hit;
             // 标记角色已经在地面上
             isGrounded = true;
             // 触发“进入地面”的事件（例如播放落地动画、音效）
@@ -287,17 +296,6 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         }
     }
 
-    protected virtual void UpdateGround(RaycastHit hit)
-    {
-        // 只有当前处于地面状态时才执行
-        if (isGrounded)
-        {
-            // 更新地面射线检测信息
-            // 更新地面射线检测信息
-            groundHit = hit;
-        }
-    }
-
     // 将角色吸附到地面（防止悬空）
     public virtual void SnapToGround(float force)
     {
@@ -308,4 +306,6 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
             verticalVelocity = Vector3.down * force;
         }
     }
+
+    #endregion
 }
