@@ -63,8 +63,22 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
 
     // 速度所有实体都通用
     public Vector3 velocity { get; protected set; }
+    
+    // 当前水平速度（XZ平面速度）
+    public Vector3 lateralVelocity
+    {
+        get { return new Vector3(velocity.x, 0, velocity.z); }
+        set { velocity = new Vector3(value.x, velocity.y, value.z); }
+    }
 
-    // 加速度函数需要用到的数值
+    // 当前垂直速度（Y轴速度）
+    public Vector3 verticalVelocity
+    {
+        get { return new Vector3(0, velocity.y, 0); }
+        set { velocity = new Vector3(velocity.x, value.y, velocity.z); }
+    }
+
+    // 全部都是预留接口，后面加新技能可能用的到
     public float accelerationMultiplier { get; set; } = 1f; // 加速度倍率
 
     public float gravityMultiplier { get; set; } = 1f; // 重力倍率
@@ -76,7 +90,7 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
     public float decelerationMultiplier { get; set; } = 1f; // 减速度倍率
 
 
-    #region 生命周期
+    #region 生命周期 LifeCycle
 
     protected virtual void Awake()
     {
@@ -98,9 +112,9 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
 
     #endregion
 
-    // 转为初始化服务
+    // 为初始化服务
 
-    #region Initialize方法
+    #region Initialize Functions 初始化方法
 
     // 初始化角色控制器组件（CharacterController）
     // 负责角色的基本移动、碰撞等物理交互
@@ -114,69 +128,26 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
             controller = gameObject.AddComponent<CharacterController>();
         }
 
-        // skinWidth 表示碰撞器表面到实际碰撞检测边界的距离（防止卡住用的小偏移）
+        // skinWidth是胶囊体的一层皮肤，防止浮点精度的问题把角色卡在墙里
+        // 表示碰撞器表面到实际碰撞检测边界的距离
         controller.skinWidth = 0.005f;
-        // minMoveDistance 为最小移动距离（设为 0 表示即使移动非常小也会被检测到）
+        // minMoveDistance 为最小移动距离，如果Move()的参数小于这个值不工作
         controller.minMoveDistance = 0;
     }
 
     // =>是C#函数体内只有一行表达式时候的使用方法，相当于{states = GetComponent<EntityStateManager<T>>()}
     protected virtual void InitializeStateManager() => states = GetComponent<EntityStateManager<T>>();
 
-    public virtual void Accelerate(Vector3 direction, float turningDrag, float acceleration, float topSpeed)
-    {
-        // 判断方向是否有效（不为零向量）
-        if (direction.sqrMagnitude > 0)
-        {
-            // 计算当前速度在目标方向上的投影速度（标量）
-            var speed = Vector3.Dot(direction, lateralVelocity);
-            // 计算当前速度在目标方向上的向量部分
-            var velocity = direction * speed;
-            // 计算当前速度中垂直于目标方向的部分（转向速度）
-            var turningVelocity = lateralVelocity - velocity;
-            // 计算转向阻力对应的速度变化量（根据转向阻力系数和时间增量）
-            var turningDelta = turningDrag * turningDragMultiplier * Time.deltaTime;
-            // 计算最大允许速度（考虑速度倍率）
-            var targetTopSpeed = topSpeed * topSpeedMultiplier;
-
-            // 如果当前速度未达最大速度，或当前速度与目标方向相反，则加速
-            if (lateralVelocity.magnitude < targetTopSpeed || speed < 0)
-            {
-                // 增加速度，受加速度倍率和时间影响
-                speed += acceleration * accelerationMultiplier * Time.deltaTime;
-                // 限制速度在[-最大速度, 最大速度]范围内
-                speed = Mathf.Clamp(speed, -targetTopSpeed, targetTopSpeed);
-            }
-
-            // 重新计算目标方向速度向量
-            velocity = direction * speed;
-            // 将转向速度平滑减小到0，实现自然转向过渡
-            turningVelocity = Vector3.MoveTowards(turningVelocity, Vector3.zero, turningDelta);
-            // 更新横向速度为目标方向速度与转向速度之和
-            lateralVelocity = velocity + turningVelocity;
-        }
-    }
-
     #endregion
 
     // 每帧执行，做一件事，动作清晰
 
-    #region Handle方法
-
-    protected virtual void HandleController()
-    {
-        if (controller.enabled)
-        {
-            controller.Move(velocity * Time.deltaTime);
-            return;
-        }
-
-        transform.position += velocity * Time.deltaTime;
-    }
-
-
+    #region Handle Functions 帧处理方法
+    
+    // 帧运行状态机的状态的行为
     protected virtual void HandleStates() => states.Step();
 
+    // 帧运行检测当前是否处于地面
     protected virtual void HandleGround()
     {
         // 距离计算：角色半高 + 地面检测的额外偏移量
@@ -197,25 +168,23 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
             ExitGround();
         }
     }
-
+    
+    // 帧处理控制控制器移动
+    protected virtual void HandleController()
+    {
+        if (controller.enabled)
+        {
+            // 此后，角色移动只需改变velocity就行（速度）
+            controller.Move(velocity * Time.deltaTime);
+            return;
+        }
+        // 瞬移兜底（如果想脚本控制瞬移直接关闭控制器就行）
+        transform.position += velocity * Time.deltaTime;
+    }
     #endregion
 
 
-    #region 人物移动
-
-    // 当前水平速度（XZ平面速度）
-    public Vector3 lateralVelocity
-    {
-        get { return new Vector3(velocity.x, 0, velocity.z); }
-        set { velocity = new Vector3(value.x, velocity.y, value.z); }
-    }
-
-    // 当前垂直速度（Y轴速度）
-    public Vector3 verticalVelocity
-    {
-        get { return new Vector3(0, velocity.y, 0); }
-        set { velocity = new Vector3(velocity.x, value.y, velocity.z); }
-    }
+    #region 人物移动 Movement
 
     // 让角色立即朝向某个方向（瞬间转向）
     public virtual void FaceDirection(Vector3 direction)
@@ -236,7 +205,7 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
     public virtual void FaceDirection(Vector3 direction, float degreesPerSecond)
     {
         // 必须是有效的方向
-        if (direction != Vector3.zero)
+        if (direction.sqrMagnitude > 0)
         {
             // 当前旋转
             var rotation = transform.rotation;
@@ -249,20 +218,53 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         }
     }
 
-    // 平滑减速，速度逐渐趋近于 0（水平速度减速）
+    // 参数就是减速度，小a，F=ma，v=at。
     public virtual void Decelerate(float deceleration)
     {
-        // 计算本帧的减速度（decelerationMultiplier 可用于调节全局减速效果）
+        // 计算本帧的减速度
         var delta = deceleration * decelerationMultiplier * Time.deltaTime;
-        // 将 lateralVelocity（水平速度向量）逐渐插值到 Vector3.zero（完全停止）
-        // 第三个参数是本帧允许的最大速度变化量
+        // 根据减速度把水平速度将逐渐插值到 Vector3.zero
         lateralVelocity = Vector3.MoveTowards(lateralVelocity, Vector3.zero, delta);
+    }
+
+    // 参数为加速方向、垂直速度的减速度a、加速度a、最大速度
+    public virtual void Accelerate(Vector3 direction, float turningDrag, float acceleration, float topSpeed)
+    {
+        if (direction.sqrMagnitude > 0)
+        {
+            // Dot(A, B) 把B投影到A
+            var speed = Vector3.Dot(direction, lateralVelocity);
+            // 目标方向上的速度分量（speed是标量，这里是矢量用来计算）
+            var velocity = direction * speed;
+            // 垂直于目标方向的速度分量，四边形法则向量相减
+            var turningVelocity = lateralVelocity - velocity;
+            // 垂直速度的减速度，让垂直的速度逐渐变为0表示转向
+            var turningDelta = turningDrag * turningDragMultiplier * Time.deltaTime;
+            // 计算最大允许速度
+            var targetTopSpeed = topSpeed * topSpeedMultiplier;
+
+            // 如果当前速度未达最大速度，或当前速度与目标方向相反，则加速
+            if (lateralVelocity.magnitude < targetTopSpeed || speed < 0)
+            {
+                // 增加速度
+                speed += acceleration * accelerationMultiplier * Time.deltaTime;
+                // 限制速度在[-最大速度, 最大速度]范围内
+                speed = Mathf.Clamp(speed, -targetTopSpeed, targetTopSpeed);
+            }
+
+            // 重新计算目标方向速度向量
+            velocity = direction * speed;
+            // 垂直速度逐渐减小
+            turningVelocity = Vector3.MoveTowards(turningVelocity, Vector3.zero, turningDelta);
+            // 更新水平面上的速度为两方向速度之和
+            lateralVelocity = velocity + turningVelocity;
+        }
     }
 
     #endregion
 
 
-    #region 地面检测
+    #region 地面检测 Ground
 
     // 进入地面状态（角色刚刚落地时调用）
     protected virtual void EnterGround()
@@ -272,7 +274,7 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         {
             // 标记角色已经在地面上
             isGrounded = true;
-            // 触发“进入地面”的事件（例如播放落地动画、音效）
+            // 触发“进入地面”的事件（本来想放音效的，但时间有点紧）
             entityEvents.OnGroundEnter?.Invoke();
         }
     }
@@ -285,18 +287,17 @@ public abstract class Entity<T> : EntityBase where T : Entity<T>
         {
             // 标记角色不在地面
             isGrounded = false;
-            // 解除与地面的父子关系（如果站在移动平台上，需要解绑）
-            transform.parent = null;
-            // 记录离开地面的时间（可能用于跳跃缓冲或着陆判断）
+            // 跳跃缓冲和土狼时间的重中之重！！！！！
             lastGroundTime = Time.time;
-            // 限制垂直速度：如果正在向下运动，不改变；如果有向上的速度，则保留（防止离地瞬间速度异常）
+            // 假如速度向下离地，那就不要向下的速度
             verticalVelocity = Vector3.Max(verticalVelocity, Vector3.zero);
-            // 触发“离开地面”的事件（例如播放起跳动画）
+            // 触发“离开地面”的事件（依旧音效）
             entityEvents.OnGroundExit?.Invoke();
         }
     }
 
     // 将角色吸附到地面（防止悬空）
+    // 主要是用在下坡的场景会出现，又在地面有下落，防抖
     public virtual void SnapToGround(float force)
     {
         // 只有接触地面，且垂直速度是向下的（y <= 0）才生效

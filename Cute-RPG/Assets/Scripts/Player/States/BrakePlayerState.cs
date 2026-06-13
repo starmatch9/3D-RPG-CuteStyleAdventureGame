@@ -1,9 +1,4 @@
-﻿using UnityEngine;
-
-
-// 将该类添加到 Unity 的组件菜单，方便在 Inspector 里挂载
-[AddComponentMenu("PLAYER TWO/Platformer Project/Player/States/Brake Player State")]
-public class BrakePlayerState : PlayerState
+﻿public class BrakePlayerState : PlayerState
 {
     // 进入刹车状态时调用
     protected override void OnEnter(Player player)
@@ -34,7 +29,4 @@ public class BrakePlayerState : PlayerState
             player.states.Change<IdlePlayerState>();
         }
     }
-    
-    // 当处于刹车状态下发生碰撞时调用
-    public override void OnContact(Player player, Collider other) { }
 }

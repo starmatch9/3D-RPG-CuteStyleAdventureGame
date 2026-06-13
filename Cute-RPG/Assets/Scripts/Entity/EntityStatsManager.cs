@@ -2,6 +2,7 @@
 
 public abstract class EntityStatsManager<T> : MonoBehaviour where T : EntityStats<T>
 {
+    // 也就是说可以存好几份数据
     public T[] stats;
     
     public T current { get; protected set; }

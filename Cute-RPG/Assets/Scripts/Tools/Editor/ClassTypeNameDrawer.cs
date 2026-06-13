@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 
-/// <summary>
-/// 自定义属性绘制器（PropertyDrawer）
-/// 用于在 Inspector 中显示 ClassTypeName 类型的下拉列表
-/// 下拉列表内容为指定基类的所有子类
-/// </summary>
+// 自定义属性绘制器（PropertyDrawer）
+// 用于在 Inspector 中显示 ClassTypeName 类型的下拉列表
+// 下拉列表内容为指定基类的所有子类
 [CustomPropertyDrawer(typeof(ClassTypeName))]
 public class ClassTypeNameDrawer : PropertyDrawer
 {
@@ -24,10 +22,8 @@ public class ClassTypeNameDrawer : PropertyDrawer
 
     // 是否已经初始化标记，避免重复初始化
     protected bool m_initialized = false;
-
-    /// <summary>
-    /// 初始化子类名称列表
-    /// </summary>
+    
+    // 初始化子类名称列表
     protected virtual void Initialize()
     {
         // 将 attribute 转换为 ClassTypeName 类型
@@ -49,12 +45,8 @@ public class ClassTypeNameDrawer : PropertyDrawer
             .Select(name => Regex.Replace(name, "(\\B[A-Z])", " $1")) // 驼峰转空格
             .ToList();
     }
-
-    /// <summary>
-    /// 初始化属性值
-    /// 如果属性为空字符串，则默认选择列表中的第一个子类
-    /// </summary>
-    /// <param name="property">SerializedProperty 对象</param>
+    
+    // 如果属性为空字符串，则默认选择列表中的第一个子类
     protected virtual void InitializeProperty(SerializedProperty property)
     {
         if (property.stringValue.Length == 0)
@@ -62,13 +54,8 @@ public class ClassTypeNameDrawer : PropertyDrawer
             property.stringValue = m_names[0];
         }
     }
-
-    /// <summary>
-    /// 绘制 Inspector 下拉列表 GUI
-    /// </summary>
-    /// <param name="position">绘制区域</param>
-    /// <param name="property">当前属性</param>
-    /// <param name="label">显示标签</param>
+    
+    // 绘制 Inspector 下拉列表 GUI
     protected virtual void HandleGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         // 如果当前属性值不在列表中，直接返回
@@ -86,10 +73,8 @@ public class ClassTypeNameDrawer : PropertyDrawer
         // 更新属性值为选择的完整类型名称
         property.stringValue = m_names[selected];
     }
-
-    /// <summary>
-    /// Unity 内置 OnGUI 方法
-    /// </summary>
+    
+    // Unity 内置 OnGUI 方法
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         // 第一次绘制时初始化

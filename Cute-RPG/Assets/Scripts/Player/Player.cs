@@ -63,7 +63,7 @@ public class Player : Entity<Player>
     // 平滑减速
     public virtual void Friction()
     {
-        Decelerate(stats.current.friction);      // 普通摩擦
+        Decelerate(stats.current.friction);// 普通摩擦
     }
     
     public virtual void Gravity()
