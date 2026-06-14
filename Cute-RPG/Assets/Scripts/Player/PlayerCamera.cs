@@ -1,6 +1,7 @@
 ﻿using Cinemachine;
 using UnityEngine;
 
+// 强制要求必须CinemachineVirtualCamera组件，否则会自动添加。
 [RequireComponent(typeof(CinemachineVirtualCamera))]
 [AddComponentMenu("Player/Player Camera")]
 public class PlayerCamera : MonoBehaviour
@@ -45,6 +46,8 @@ public class PlayerCamera : MonoBehaviour
 
     protected string k_targetName = "Player Follower Camera Target"; // 临时目标对象的名称
     
+    #region 生命周期
+    
     protected virtual void Start()
     {
         InitializeComponents();
@@ -60,6 +63,10 @@ public class PlayerCamera : MonoBehaviour
         MoveTarget();         // 更新相机目标
     }
     
+    #endregion
+
+    #region 初始化方法
+
     protected virtual void InitializeComponents()
     {
         if (!player)
@@ -86,32 +93,12 @@ public class PlayerCamera : MonoBehaviour
 
         Reset();
     }
-    
-    public virtual void Reset()
-    {
-        m_cameraDistance = maxDistance;
-        m_cameraTargetPitch = initialAngle; // 设定初始俯仰角
-        m_cameraTargetYaw = player.transform.rotation.eulerAngles.y; // 根据玩家朝向设定相机水平角
-        m_cameraTargetPosition = player.unsizedPosition + Vector3.up * heightOffset; // 初始位置
-        // m_cameraTargetPosition = player.transform.position + Vector3.up * heightOffset; // 初始位置
-        MoveTarget();
-        m_brain.ManualUpdate(); // 强制刷新相机
-    }
-    
-    protected virtual void MoveTarget()
-    {
-        m_target.position = m_cameraTargetPosition;
-        m_target.rotation = Quaternion.Euler(m_cameraTargetPitch, m_cameraTargetYaw, 0.0f);
-        m_cameraBody.CameraDistance = m_cameraDistance;
-    }
-    
-    // 判断是否处于需要竖直跟随的状态
-    protected virtual bool VerticalFollowingStates()
-    {
-        return true;
-    }
-    
-    protected virtual void HandleOrbit()
+
+    #endregion
+
+    #region 帧处理方法
+
+        protected virtual void HandleOrbit()
     {
         // 判断是否允许手动环绕相机
         if (canOrbit)
@@ -211,6 +198,32 @@ public class PlayerCamera : MonoBehaviour
             // Time.deltaTime    -> 保证旋转与帧率无关，平滑过渡
             m_cameraTargetYaw += localVelocity.x * orbitVelocityMultiplier * Time.deltaTime;
         }
+    }
+    #endregion
+    
+    public virtual void Reset()
+    {
+        m_cameraDistance = maxDistance;
+        m_cameraTargetPitch = initialAngle; // 设定初始俯仰角
+        m_cameraTargetYaw = player.transform.rotation.eulerAngles.y; // 根据玩家朝向设定相机水平角
+        m_cameraTargetPosition = player.unsizedPosition + Vector3.up * heightOffset; // 初始位置
+        // m_cameraTargetPosition = player.transform.position + Vector3.up * heightOffset; // 初始位置
+        MoveTarget();
+        m_brain.ManualUpdate(); // 强制刷新相机
+    }
+    
+    protected virtual void MoveTarget()
+    {
+        m_target.position = m_cameraTargetPosition;
+        m_target.rotation = Quaternion.Euler(m_cameraTargetPitch, m_cameraTargetYaw, 0.0f);
+        m_cameraBody.CameraDistance = m_cameraDistance;
+    }
+
+    
+    // 判断是否处于需要竖直跟随的状态
+    protected virtual bool VerticalFollowingStates()
+    {
+        return true;
     }
     
     // 限制角度在给定区间内
