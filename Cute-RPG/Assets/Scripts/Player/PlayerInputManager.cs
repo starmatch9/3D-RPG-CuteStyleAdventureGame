@@ -58,6 +58,7 @@ public class PlayerInputManager : MonoBehaviour
 
         if (IsLookingWithMouse())
         {
+            // 鼠标平面上的x和y，对应就是左手坐标系中的x和z
             return new Vector3(value.x, 0, value.y);
         }
 

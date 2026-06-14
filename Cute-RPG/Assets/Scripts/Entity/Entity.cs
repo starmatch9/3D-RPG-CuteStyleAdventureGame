@@ -10,6 +10,12 @@ public abstract class EntityBase : MonoBehaviour
     // 角色控制器，自带碰撞检测的胶囊体物理组件，自带Move()等方法
     public CharacterController controller { get; protected set; } // 角色控制器组件
 
+    // 下面这种=>就相当于这个
+    // public Vector3 unsizedPosition
+    // {
+    //     get { return transform.position; }
+    // }
+    
     // 胶囊体的高
     public float height => controller.height;
 
