@@ -24,6 +24,7 @@ public class PlayerCamera : MonoBehaviour
     public bool canOrbit = true; // 是否允许相机跟随鼠标环绕
     public bool canOrbitWithVelocity = true; // 是否允许通过速度带动相机旋转
     public float orbitVelocityMultiplier = 5; // 角色速度带动相机旋转的倍率
+    [Range(0f, 2f)]public float sensitivity = 1f;
 
     
     //限制仰俯角
@@ -136,7 +137,7 @@ public class PlayerCamera : MonoBehaviour
                 // 根据输入设备选择不同的时间因子
                 // -鼠标：乘 Time.timeScale（鼠标本身就是绝对位移，不是连续的速度值，直接使用timeScale，正常就是1）
                 // -手柄：乘 Time.deltaTime（当前帧的秒数，保证旋转平滑、与帧率无关， Time.deltaTime = Time.timeScale × 真实帧时间）
-                float deltaTimeMultiplier = usingMouse ? Time.timeScale : Time.deltaTime;
+                float deltaTimeMultiplier = (usingMouse ? Time.timeScale : Time.deltaTime) * sensitivity;
 
                 // 每帧变化偏航角（Yaw）
                 // direction.x -> 鼠标左右移动
